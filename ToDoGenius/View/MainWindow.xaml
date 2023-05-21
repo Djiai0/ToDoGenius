@@ -1,0 +1,89 @@
+﻿<Window
+    x:Class="ToDoGenius.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:ToDoGenius.ViewModels"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Title="TaskManager"
+    Width="800"
+    Height="450">
+    <Window.DataContext>
+        <local:TaskViewModel />
+    </Window.DataContext>
+
+    <Window.Resources>
+        <!--  Define colors  -->
+        <Color x:Key="PrimaryColor">#FF4287f5</Color>
+        <Color x:Key="SecondaryColor">#FF36a2a6</Color>
+        <Color x:Key="AccentColor">#FFf54e42</Color>
+        <Color x:Key="LightColor">#FFF2F2F2</Color>
+
+        <!--  Define brushes  -->
+        <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource PrimaryColor}" />
+        <SolidColorBrush x:Key="SecondaryBrush" Color="{StaticResource SecondaryColor}" />
+        <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}" />
+        <SolidColorBrush x:Key="LightBrush" Color="{StaticResource LightColor}" />
+
+        <!--  Define styles  -->
+        <Style x:Key="ButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource PrimaryBrush}" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="Padding" Value="10" />
+            <Setter Property="Margin" Value="5" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{StaticResource SecondaryBrush}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
+    <Grid Background="{StaticResource LightBrush}">
+        <!--  UI elements here  -->
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <StackPanel
+            Grid.Row="0"
+            Margin="10"
+            Orientation="Horizontal">
+            <Button
+                Click="AddTaskButton_Click"
+                Command="{Binding AddTaskCommand}"
+                CommandParameter="{Binding TaskPrototype}"
+                Content="Ajouter une tâche"
+                Style="{StaticResource ButtonStyle}" />
+            <Button
+                Command="{Binding StartTaskCommand}"
+                Content="Démarrer la tâche"
+                Style="{StaticResource ButtonStyle}" />
+            <Button
+                Command="{Binding CompleteTaskCommand}"
+                Content="Terminer la tâche"
+                Style="{StaticResource ButtonStyle}" />
+        </StackPanel>
+
+        <ListBox
+            Grid.Row="1"
+            Margin="10"
+            ItemsSource="{Binding Tasks, UpdateSourceTrigger=PropertyChanged}"
+            SelectedItem="{Binding SelectedTask}">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel>
+                        <CheckBox IsChecked="{Binding Status}" />
+                        <TextBlock FontWeight="Bold" Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock Text="{Binding DueDate, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+    </Grid>
+</Window>
