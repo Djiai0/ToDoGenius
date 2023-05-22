@@ -1,9 +1,10 @@
 ﻿using System;
 using System.ComponentModel;
+using ToDoGenius.ViewModels;
 
 namespace ToDoGenius.Models
 {
-    public class Task : INotifyPropertyChanged
+    public class TodoTask : BaseViewModel
     {
         private string title;
         public string Title
@@ -47,25 +48,19 @@ namespace ToDoGenius.Models
             }
         }
 
-        private string status;
-        public string Status
+       private string state;
+        public string State
         {
-            get { return status; }
+            get { return state; }
             set
             {
-                if (status != value)
+                if (state != value)
                 {
-                    status = value;
-                    OnPropertyChanged(nameof(Status));
+                    state = value;
+                    OnPropertyChanged(nameof(State));
+
                 }
             }
-        }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        protected virtual void OnPropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

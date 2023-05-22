@@ -5,9 +5,11 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:ToDoGenius.Models"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    Title="Ajouter une tâche">
+    Title="Ajouter une tâche"
+    Width="300"
+    Height="160">
     <Window.DataContext>
-        <local:Task/>
+        <local:TaskPrototype />
     </Window.DataContext>
     <Grid>
         <Grid.RowDefinitions>
@@ -26,26 +28,32 @@
             x:Name="Titre"
             Grid.Column="1"
             Margin="5"
-            Text="{Binding Title}" />
+            Text="{Binding Title, Mode=TwoWay}"
+            TextChanged="Titre_TextChanged" />
         <Label Grid.Row="1" Content="Description:" />
         <TextBox
             x:Name="Description"
             Grid.Row="1"
             Grid.Column="1"
             Margin="5"
-            Text="{Binding Description}" />
+            Text="{Binding Description, Mode=TwoWay}"
+            TextChanged="Description_TextChanged" />
         <Label Grid.Row="2" Content="Date d'échéance:" />
         <DatePicker
             x:Name="Date"
             Grid.Row="2"
             Grid.Column="1"
             Margin="5"
-            SelectedDate="{Binding DueDate}" />
+            DisplayDate="2019-01-01"
+            SelectedDate="{Binding DueDate, StringFormat='dd/MM/yyyy', Mode=TwoWay, TargetNullValue='', UpdateSourceTrigger=PropertyChanged}" />
+
         <Button
+            x:Name="validateButton"
             Grid.Row="4"
             Grid.ColumnSpan="2"
             Margin="5"
             Click="AddButton_Click"
-            Content="Ajouter" />
+            Content="Ajouter"
+            IsEnabled="false" />
     </Grid>
 </Window>
