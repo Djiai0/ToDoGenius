@@ -1,16 +1,19 @@
 ﻿using System.Windows;
 using ToDoGenius.Models;
+using ToDoGenius.Services;
+using ToDoGenius.ViewModels;
 
 namespace ToDoGenius.State
 {
     public class CompletedState : ITaskState
     {
-        public void HandleTask(Task task)
+        public void HandleTask(TodoTask task, TaskObjectPool taskObjectPool)
         {
-            // Logique spécifique pour le traitement des tâches terminées
-            task.Status = "Terminé";
-            // Autres opérations à effectuer pour les tâches terminées
+            TaskViewModel taskViewModel = new();
+            taskViewModel.Tasks.Remove(task);
+            taskObjectPool.ReturnTask(task);
             MessageBox.Show($"La tâche '{task.Title}' est maintenant terminée.");
+            task.State = "completed";
         }
     }
 }
