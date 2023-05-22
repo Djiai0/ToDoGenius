@@ -1,22 +1,26 @@
-﻿using System.Collections.ObjectModel;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using ToDoGenius.Models;
 using ToDoGenius.Services;
 using ToDoGenius.State;
 using ToDoGenius.View;
-using Task = ToDoGenius.Models.Task;
+using System.Text.Json;
+using TodoTask = ToDoGenius.Models.TodoTask;
+using System;
 
 namespace ToDoGenius.ViewModels
 {
     public class TaskViewModel : BaseViewModel
     {
-        private readonly TaskObjectPool taskObjectPool;
         private readonly ITaskState inProgressState;
         private readonly ITaskState completedState;
-        private ObservableCollection<Task> tasks;
-        public ObservableCollection<Task> Tasks
+        private ObservableCollection<TodoTask> tasks;
+
+        public ObservableCollection<TodoTask> Tasks
         {
             get { return tasks; }
             set
@@ -25,11 +29,12 @@ namespace ToDoGenius.ViewModels
                 OnPropertyChanged(nameof(Tasks));
             }
         }
+        public TaskObjectPool TaskPool { get; } = new TaskObjectPool();
 
         public TaskPrototype TaskPrototype { get; private set; }
 
-        private Task selectedTask;
-        public Task SelectedTask
+        private TodoTask selectedTask;
+        public TodoTask SelectedTask
         {
             get { return selectedTask; }
             set
@@ -42,78 +47,72 @@ namespace ToDoGenius.ViewModels
             }
         }
 
-        public ICommand StartTaskCommand { get; private set; }
-        public ICommand CompleteTaskCommand { get; private set; }
-
         public ICommand AddTaskCommand { get; private set; }
 
         public TaskViewModel()
         {
-            taskObjectPool = new TaskObjectPool();
+            TaskPool = new TaskObjectPool();
             inProgressState = new InProgressState();
             completedState = new CompletedState();
-
-            Tasks = new ObservableCollection<Task>();
-            TaskPrototype = new TaskPrototype();
+            Tasks = new ObservableCollection<TodoTask>();
             AddTaskCommand = new RelayCommand(AddTask);
-            StartTaskCommand = new RelayCommand(StartTask, CanStartTask);
-            CompleteTaskCommand = new RelayCommand(CompleteTask, CanCompleteTask);
-
         }
 
-        private bool CanStartTask(object parameter)
+        public void SaveTasksToJson()
         {
-            return SelectedTask != null && SelectedTask.Status != "En cours";
+            List<TodoTask> uncompletedTasks = Tasks.Where(TodoTask => TodoTask.State == "En cours").ToList();
+
+            string json = JsonSerializer.Serialize(uncompletedTasks);
+            File.WriteAllText("tasks.json", json);
         }
 
-        private void StartTask(object parameter)
+        public void LoadTasksFromJson()
         {
-            if (SelectedTask != null)
+            if (File.Exists("tasks.json"))
             {
-                Task task = taskObjectPool.GetTask();
-                task.Title = SelectedTask.Title;
-                task.Description = SelectedTask.Description;
-                task.DueDate = SelectedTask.DueDate;
+                string json = File.ReadAllText("tasks.json");
+                List<TodoTask> uncompletedTasks = JsonSerializer.Deserialize<List<TodoTask>>(json);
 
-                // Update the task state to "In Progress"
-                inProgressState.HandleTask(task);
-
-                Tasks.Remove(SelectedTask);
-                SelectedTask = null;
+                if (uncompletedTasks != null)
+                {
+                    foreach (TodoTask TodoTask in uncompletedTasks)
+                    {
+                        Tasks.Add(TodoTask);
+                        OnPropertyChanged(nameof(Tasks));
+                    }
+                }
             }
         }
 
-        private bool CanCompleteTask(object parameter)
-        {
-            return SelectedTask != null && SelectedTask.Status != "Terminé";
-        }
-
-        private void CompleteTask(object parameter)
-        {
-            if (SelectedTask != null)
-            {
-                // Update the task state to "Completed"
-                completedState.HandleTask(SelectedTask);
-
-                Tasks.Remove(SelectedTask);
-                SelectedTask = null;
-            }
-        }
         private void AddTask(object parameter)
         {
-            TaskPrototype taskPrototype = parameter as TaskPrototype;
-
-            // Créez une nouvelle instance de la classe Task avec les valeurs saisies
-            Task task = new Task
+            if (parameter is TaskPrototype taskPrototype)
             {
-                Title = taskPrototype.Title,
-                Description = taskPrototype.Description,
-                DueDate = taskPrototype.DueDate,
-                Status = taskPrototype.Status,
-            };
+                if (!string.IsNullOrEmpty(taskPrototype.Title))
+                {
+                    // créer une nouvelle instance de la classe InprogressState pour définir l'état de la tâche
+                    InProgressState inProgressState = new();
+                    // Créez une nouvelle instance de la classe TodoTask avec les valeurs saisies
+                    // Obtenez une instance de TodoTask à partir du pool
+                    TodoTask todoTask = TaskPool.GetTask();
 
-            // Ajoutez la tâche à la collection Tasks
-            Tasks.Add(task);
+                    todoTask.Title = taskPrototype.Title;
+                    todoTask.Description = taskPrototype.Description;
+                    todoTask.DueDate = taskPrototype.DueDate;
+               
+                    //définir l'état sur "en cours"
+                    inProgressState.HandleTask(todoTask, TaskPool);
+
+                    // Ajoutez la tâche à la collection Tasks
+                    _ = taskPrototype.Clone();
+                    Tasks.Add(todoTask);
+                    OnPropertyChanged(nameof(Tasks));
+                }
+                else
+                {
+                    MessageBox.Show("Veuillez saisir le titre de la tâche.", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
         }
     }
 }

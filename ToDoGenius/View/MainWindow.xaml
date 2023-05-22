@@ -43,12 +43,17 @@
     </Window.Resources>
 
     <Grid Background="{StaticResource LightBrush}">
+
         <!--  UI elements here  -->
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-
+        <TextBlock
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            FontSize="24"
+            Text="ToDo Genius" />
         <StackPanel
             Grid.Row="0"
             Margin="10"
@@ -59,14 +64,7 @@
                 CommandParameter="{Binding TaskPrototype}"
                 Content="Ajouter une tâche"
                 Style="{StaticResource ButtonStyle}" />
-            <Button
-                Command="{Binding StartTaskCommand}"
-                Content="Démarrer la tâche"
-                Style="{StaticResource ButtonStyle}" />
-            <Button
-                Command="{Binding CompleteTaskCommand}"
-                Content="Terminer la tâche"
-                Style="{StaticResource ButtonStyle}" />
+
         </StackPanel>
 
         <ListBox
@@ -77,10 +75,10 @@
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <StackPanel>
-                        <CheckBox IsChecked="{Binding Status}" />
+                        <CheckBox Checked="Checkbox_Checked_1" IsChecked="{Binding IsCompleted, UpdateSourceTrigger=PropertyChanged}" />
                         <TextBlock FontWeight="Bold" Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}" />
                         <TextBlock Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" />
-                        <TextBlock Text="{Binding DueDate, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock Text="{Binding DueDate, StringFormat='dd/MM/yyyy', UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                 </DataTemplate>
             </ListBox.ItemTemplate>

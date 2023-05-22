@@ -5,14 +5,14 @@ namespace ToDoGenius.Services
 {
     public class TaskObjectPool
     {
-        private readonly Queue<Task> taskPool;
+        private readonly Queue<TodoTask> taskPool;
 
         public TaskObjectPool()
         {
-            taskPool = new Queue<Task>();
+            taskPool = new Queue<TodoTask>();
         }
 
-        public Task GetTask()
+        public TodoTask GetTask()
         {
             if (taskPool.Count > 0)
             {
@@ -24,16 +24,16 @@ namespace ToDoGenius.Services
             }
         }
 
-        public void ReturnTask(Task task)
+        public void ReturnTask(TodoTask TodoTask)
         {
-            // Reset task properties if needed
-            taskPool.Enqueue(task);
+            // Reset TodoTask properties if needed
+            taskPool.Enqueue(TodoTask);
         }
 
-        private static Task CreateNewTask()
+        private static TodoTask CreateNewTask()
         {
-            // Create a new instance of Task
-            return new Task();
+            // Create a new instance of TodoTask
+            return new TodoTask();
         }
     }
 }
